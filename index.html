@@ -50,6 +50,17 @@
             <strong>โหมดปัจจุบัน:</strong> Frontend/PWA ยังไม่เชื่อม backend พากย์สด เว็บไซต์ที่บล็อก iframe จะเปิดในโหมดนี้ไม่ได้ จนกว่าจะเชื่อม Remote Browser/Proxy ภายหลัง
           </div>
         </div>
+
+        <div class="quick-tests" id="quickTests">
+          <div class="section-head compact"><h2>ทดสอบ Browser</h2></div>
+          <p class="test-help">ใช้ 3 เว็บนี้เช็กพฤติกรรมบน iPhone ก่อนเชื่อม backend</p>
+          <div class="test-grid">
+            <button data-test-url="https://example.com"><strong>Example</strong><span>เว็บเรียบง่ายสำหรับทดสอบ iframe</span></button>
+            <button data-test-url="https://www.wikipedia.org"><strong>Wikipedia</strong><span>เว็บภายนอกทั่วไป</span></button>
+            <button data-test-url="https://www.youtube.com"><strong>YouTube</strong><span>ตัวอย่างเว็บที่มักจำกัดการฝังหน้าหลัก</span></button>
+          </div>
+        </div>
+
         <div class="section-head">
           <h2>เว็บไซต์ที่บันทึก</h2>
           <button id="clearFavoritesBtn" class="text-btn danger">ล้างทั้งหมด</button>
@@ -60,13 +71,16 @@
       <section id="browserView" class="browser-view hidden">
         <div id="statusBar" class="status-bar">
           <span id="pageStatus">พร้อม</span>
-          <span id="dubStatus" class="pill">พากย์ไทย: ปิด</span>
+          <div class="status-actions">
+            <button id="openDirectBtn" class="direct-btn" type="button">เปิดตรง ↗</button>
+            <span id="dubStatus" class="pill">พากย์ไทย: ปิด</span>
+          </div>
         </div>
         <div class="frame-wrap">
           <iframe id="browserFrame" title="Web browser" referrerpolicy="no-referrer-when-downgrade" sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-downloads allow-presentation"></iframe>
           <div id="frameFallback" class="frame-fallback hidden">
             <h3>เว็บไซต์นี้อาจไม่อนุญาตให้แสดงในหน้าอื่น</h3>
-            <p>เมื่อเชื่อม Remote Browser/Proxy ในเฟสท้าย ระบบจะรองรับเว็บไซต์ได้มากขึ้น</p>
+            <p>นี่เป็นข้อจำกัดความปลอดภัยของเว็บไซต์ปลายทาง ไม่ใช่ความผิดพลาดของ iPhone เมื่อเชื่อม Remote Browser/Proxy ในเฟสท้าย ระบบจะรองรับเว็บไซต์ได้มากขึ้น</p>
             <button id="openExternalBtn" class="primary-btn">เปิด URL โดยตรง</button>
           </div>
         </div>
@@ -89,42 +103,12 @@
           <h2>ตั้งค่า</h2>
           <button value="cancel" class="icon-btn">✕</button>
         </div>
-        <label class="field">
-          <span>ภาษาต้นฉบับ</span>
-          <select id="sourceLang">
-            <option value="auto">ตรวจจับอัตโนมัติ</option>
-            <option value="en">English</option>
-            <option value="zh">中文</option>
-            <option value="ja">日本語</option>
-            <option value="ko">한국어</option>
-          </select>
-        </label>
-        <label class="field">
-          <span>ภาษาเป้าหมาย</span>
-          <select id="targetLang">
-            <option value="th">ไทย</option>
-          </select>
-        </label>
-        <label class="field">
-          <span>เสียงพากย์</span>
-          <select id="voiceStyle">
-            <option value="female">ผู้หญิง</option>
-            <option value="male">ผู้ชาย</option>
-            <option value="natural">ธรรมชาติ</option>
-          </select>
-        </label>
-        <label class="field">
-          <span>ระดับเสียงต้นฉบับ <output id="sourceVolumeOut">15%</output></span>
-          <input id="sourceVolume" type="range" min="0" max="100" step="5" value="15" />
-        </label>
-        <label class="field">
-          <span>ระดับเสียงพากย์ <output id="dubVolumeOut">100%</output></span>
-          <input id="dubVolume" type="range" min="0" max="100" step="5" value="100" />
-        </label>
-        <label class="check-field">
-          <input id="showSubtitles" type="checkbox" checked />
-          <span>แสดงซับไทยพร้อมเสียงพากย์</span>
-        </label>
+        <label class="field"><span>ภาษาต้นฉบับ</span><select id="sourceLang"><option value="auto">ตรวจจับอัตโนมัติ</option><option value="en">English</option><option value="zh">中文</option><option value="ja">日本語</option><option value="ko">한국어</option></select></label>
+        <label class="field"><span>ภาษาเป้าหมาย</span><select id="targetLang"><option value="th">ไทย</option></select></label>
+        <label class="field"><span>เสียงพากย์</span><select id="voiceStyle"><option value="female">ผู้หญิง</option><option value="male">ผู้ชาย</option><option value="natural">ธรรมชาติ</option></select></label>
+        <label class="field"><span>ระดับเสียงต้นฉบับ <output id="sourceVolumeOut">15%</output></span><input id="sourceVolume" type="range" min="0" max="100" step="5" value="15" /></label>
+        <label class="field"><span>ระดับเสียงพากย์ <output id="dubVolumeOut">100%</output></span><input id="dubVolume" type="range" min="0" max="100" step="5" value="100" /></label>
+        <label class="check-field"><input id="showSubtitles" type="checkbox" checked /><span>แสดงซับไทยพร้อมเสียงพากย์</span></label>
         <div class="dialog-actions">
           <button id="exportBtn" type="button" class="secondary-btn">ส่งออกข้อมูล</button>
           <label class="secondary-btn file-label">นำเข้าข้อมูล<input id="importInput" type="file" accept="application/json" hidden /></label>
@@ -135,7 +119,6 @@
 
     <div id="toast" class="toast hidden"></div>
   </div>
-
   <script type="module" src="./js/app.js"></script>
 </body>
 </html>
