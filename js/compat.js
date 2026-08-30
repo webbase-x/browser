@@ -1,3 +1,5 @@
+import './youtube-dub.js';
+
 const $ = id => document.getElementById(id);
 const quickTests = $('quickTests');
 const urlForm = $('urlForm');
