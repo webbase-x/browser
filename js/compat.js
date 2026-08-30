@@ -10,6 +10,7 @@ const openDirectBtn = $('openDirectBtn');
 const restrictedHosts = [
   /(^|\.)google\./i,
   /(^|\.)youtube\.com$/i,
+  /(^|\.)youtu\.be$/i,
   /(^|\.)facebook\.com$/i,
   /(^|\.)instagram\.com$/i,
   /(^|\.)tiktok\.com$/i,
@@ -24,7 +25,23 @@ function currentUrl() {
   try { return new URL(value).href; } catch { return value; }
 }
 
+function youtubeVideoId(url) {
+  try {
+    const u = new URL(url);
+    if (/(^|\.)youtu\.be$/i.test(u.hostname)) return u.pathname.split('/').filter(Boolean)[0] || '';
+    if (/(^|\.)youtube\.com$/i.test(u.hostname)) {
+      if (u.pathname === '/watch') return u.searchParams.get('v') || '';
+      const m = u.pathname.match(/^\/(?:shorts|live|embed)\/([^/?#]+)/);
+      if (m) return m[1];
+    }
+  } catch {}
+  return '';
+}
+
+function isYoutubeVideo(url) { return !!youtubeVideoId(url); }
+
 function isLikelyRestricted(url) {
+  if (isYoutubeVideo(url)) return false;
   try {
     const host = new URL(url).hostname;
     return restrictedHosts.some(re => re.test(host));
@@ -49,6 +66,11 @@ quickTests?.addEventListener('click', e => {
 urlForm?.addEventListener('submit', () => {
   const url = currentUrl();
   if (!url) return;
+  if (isYoutubeVideo(url)) {
+    fallback?.classList.add('hidden');
+    if (pageStatus) pageStatus.textContent = 'YouTube: กำลังเปิดวิดีโอแบบ Embed';
+    return;
+  }
   if (isLikelyRestricted(url)) {
     setTimeout(() => {
       fallback?.classList.remove('hidden');
@@ -64,6 +86,11 @@ urlForm?.addEventListener('submit', () => {
 
 frame?.addEventListener('load', () => {
   const url = currentUrl();
+  if (isYoutubeVideo(url)) {
+    fallback?.classList.add('hidden');
+    if (pageStatus) pageStatus.textContent = 'YouTube: วิดีโอพร้อมเล่น';
+    return;
+  }
   if (isLikelyRestricted(url)) {
     setTimeout(() => fallback?.classList.remove('hidden'), 300);
   }
