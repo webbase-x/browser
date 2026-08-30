@@ -2,12 +2,14 @@ import './youtube-dub.js';
 
 const $ = id => document.getElementById(id);
 const quickTests = $('quickTests');
+const popularSites = $('popularSites');
 const urlForm = $('urlForm');
 const urlInput = $('urlInput');
 const frame = $('browserFrame');
 const fallback = $('frameFallback');
 const pageStatus = $('pageStatus');
 const openDirectBtn = $('openDirectBtn');
+const openExternalBtn = $('openExternalBtn');
 
 const restrictedHosts = [
   /(^|\.)google\./i,
@@ -18,11 +20,21 @@ const restrictedHosts = [
   /(^|\.)tiktok\.com$/i,
   /(^|\.)netflix\.com$/i,
   /(^|\.)x\.com$/i,
-  /(^|\.)twitter\.com$/i
+  /(^|\.)twitter\.com$/i,
+  /(^|\.)xhaccess\.com$/i,
+  /(^|\.)xhamster\.com$/i
 ];
 
+function normalize(value='') {
+  const v = value.trim();
+  if (!v) return '';
+  if (/^https?:\/\//i.test(v)) return v;
+  if (/^[\w.-]+\.[a-z]{2,}(\/.*)?$/i.test(v)) return `https://${v}`;
+  return v;
+}
+
 function currentUrl() {
-  const value = (urlInput?.value || '').trim();
+  const value = normalize(urlInput?.value || '');
   if (!value) return '';
   try { return new URL(value).href; } catch { return value; }
 }
@@ -50,40 +62,46 @@ function isLikelyRestricted(url) {
   } catch { return false; }
 }
 
-function openDirect() {
-  const url = currentUrl();
+function openDirect(url = currentUrl()) {
   if (!url) return;
-  window.open(url, '_blank', 'noopener');
+  const win = window.open(url, '_blank', 'noopener');
+  if (!win && pageStatus) pageStatus.textContent = 'Safari บล็อกการเปิดแท็บใหม่ — แตะ “เปิดตรง ↗” อีกครั้ง';
 }
 
-openDirectBtn?.addEventListener('click', openDirect);
+openDirectBtn?.addEventListener('click', () => openDirect());
+openExternalBtn?.addEventListener('click', () => openDirect());
 
-quickTests?.addEventListener('click', e => {
+function triggerShortcut(e) {
   const btn = e.target.closest('[data-test-url]');
   if (!btn) return;
   urlInput.value = btn.dataset.testUrl;
   urlForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-});
+}
+quickTests?.addEventListener('click', triggerShortcut);
+popularSites?.addEventListener('click', triggerShortcut);
 
 urlForm?.addEventListener('submit', () => {
   const url = currentUrl();
   if (!url) return;
+
   if (isYoutubeVideo(url)) {
     fallback?.classList.add('hidden');
     if (pageStatus) pageStatus.textContent = 'YouTube: กำลังเปิดวิดีโอแบบ Embed';
     return;
   }
+
   if (isLikelyRestricted(url)) {
-    setTimeout(() => {
-      fallback?.classList.remove('hidden');
-      if (pageStatus) pageStatus.textContent = 'เว็บนี้มักจำกัดการฝังหน้า — ใช้ “เปิดตรง” ชั่วคราว';
-    }, 1200);
-  } else {
-    setTimeout(() => {
-      if (!fallback?.classList.contains('hidden')) return;
-      if (pageStatus) pageStatus.textContent = 'หากหน้าเว็บว่าง แปลว่าเว็บปลายทางบล็อก iframe';
-    }, 4500);
+    if (frame) frame.src = 'about:blank';
+    fallback?.classList.remove('hidden');
+    if (pageStatus) pageStatus.textContent = 'เว็บนี้ไม่รองรับการเปิดภายใน AI Browser — กำลังเปิดเว็บต้นทาง';
+    openDirect(url);
+    return;
   }
+
+  setTimeout(() => {
+    if (!fallback?.classList.contains('hidden')) return;
+    if (pageStatus) pageStatus.textContent = 'หากหน้าเว็บว่าง แปลว่าเว็บปลายทางบล็อก iframe — ใช้ “เปิดตรง ↗”';
+  }, 4500);
 });
 
 frame?.addEventListener('load', () => {
@@ -94,6 +112,7 @@ frame?.addEventListener('load', () => {
     return;
   }
   if (isLikelyRestricted(url)) {
-    setTimeout(() => fallback?.classList.remove('hidden'), 300);
+    fallback?.classList.remove('hidden');
+    if (pageStatus) pageStatus.textContent = 'เว็บนี้เปิดได้เฉพาะที่เว็บต้นทาง';
   }
 });
