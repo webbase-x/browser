@@ -20,7 +20,8 @@ let navStack=[], navIndex=-1, currentUrl='', displayedUrl='', frameLoadTimer=nul
 const blockedHosts = [
   /(^|\.)youtube\.com$/i, /(^|\.)youtu\.be$/i, /(^|\.)google\./i,
   /(^|\.)facebook\.com$/i, /(^|\.)instagram\.com$/i, /(^|\.)tiktok\.com$/i,
-  /(^|\.)x\.com$/i, /(^|\.)twitter\.com$/i, /(^|\.)netflix\.com$/i
+  /(^|\.)x\.com$/i, /(^|\.)twitter\.com$/i, /(^|\.)netflix\.com$/i,
+  /(^|\.)xhamster\.com$/i, /(^|\.)xhaccess\.com$/i
 ];
 
 function normalizeInput(value){
@@ -75,7 +76,7 @@ async function openUrl(url,{push=true}={}){
     els.browserFrame.src=ytEmbed;
   } else if(hostUsuallyBlocks(normalized)){
     els.browserFrame.src='about:blank';
-    showFallback(`${domainName(normalized)} จำกัดการฝังหน้าเว็บ — ใช้ “เปิดตรง ↗”`);
+    showFallback(`${domainName(normalized)} จำกัดการฝัง/วิดีโอในเว็บอื่น — ใช้ “เปิดตรง ↗”`);
   } else {
     displayedUrl=normalized; showFrame(); els.browserFrame.src=normalized;
     frameLoadTimer=setTimeout(()=>showFallback('เว็บไซต์อาจบล็อกการฝังหน้าเว็บ — ลอง “เปิดตรง ↗”'),7000);
@@ -86,8 +87,16 @@ async function openUrl(url,{push=true}={}){
 async function startDubIfPossible(){
   els.dubStatus.textContent='พากย์ไทย: กำลังเตรียม';
   if(!dubApi.configured){els.dubStatus.textContent='พากย์ไทย: รอ backend';showToast('โครงพากย์พร้อมแล้ว แต่ยังไม่ได้เชื่อม backend');return;}
-  try{activeDubSession=await dubApi.createSession({url:currentUrl,sourceLang:settings.sourceLang,targetLang:settings.targetLang,voiceStyle:settings.voiceStyle,sourceVolume:settings.sourceVolume,dubVolume:settings.dubVolume,showSubtitles:settings.showSubtitles});els.dubStatus.textContent='พากย์ไทย: ทำงาน';}
-  catch(err){els.dubStatus.textContent='พากย์ไทย: ผิดพลาด';showToast(err.message);}
+  try{
+    activeDubSession=await dubApi.createSession({url:currentUrl,sourceLang:settings.sourceLang,targetLang:settings.targetLang,voiceStyle:settings.voiceStyle,sourceVolume:settings.sourceVolume,dubVolume:settings.dubVolume,showSubtitles:settings.showSubtitles});
+    els.dubStatus.textContent='พากย์ไทย: ทำงาน';
+  } catch(err){
+    const msg=String(err?.message||'');
+    if(/ไม่มีคำบรรยาย|no_captions|STT/i.test(msg)) els.dubStatus.textContent='พากย์ไทย: ไม่มีซับ → ต้องใช้ STT';
+    else if(hostUsuallyBlocks(currentUrl) && !youtubeEmbedUrl(currentUrl)) els.dubStatus.textContent='พากย์ไทย: เว็บนี้ต้องเปิดตรง';
+    else els.dubStatus.textContent='พากย์ไทย: ผิดพลาด';
+    showToast(msg || 'เริ่มพากย์ไม่สำเร็จ');
+  }
 }
 async function stopDub(){if(activeDubSession?.id) await dubApi.stopSession(activeDubSession.id).catch(()=>{});activeDubSession=null;els.dubStatus.textContent='พากย์ไทย: ปิด';}
 function showHome(){currentUrl='';displayedUrl='';els.urlInput.value='';els.browserFrame.src='about:blank';els.browserView.classList.add('hidden');els.homeView.classList.remove('hidden');renderHomeFavorites();updateNavButtons();}
