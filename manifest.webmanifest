@@ -1,0 +1,14 @@
+{
+  "name": "AI Thai Browser",
+  "short_name": "AI Browser",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b1020",
+  "theme_color": "#111827",
+  "lang": "th",
+  "description": "PWA browser shell with local favorites/history and live Thai dubbing backend adapter.",
+  "icons": [
+    { "src": "./assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
