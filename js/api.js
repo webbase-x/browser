@@ -1,5 +1,5 @@
-// Backend adapter. API base will be filled after the one-time Vercel deployment.
-const DEFAULT_API_BASE = '';
+// Backend adapter connected to the production Vercel API.
+const DEFAULT_API_BASE = 'https://browser-phairats-projects.vercel.app';
 
 export class DubApi {
   constructor(baseUrl = DEFAULT_API_BASE) {
