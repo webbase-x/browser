@@ -24,10 +24,28 @@ export class DubApi {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const reason = data.error === 'no_captions' ? 'คลิปนี้ไม่มีคำบรรยายที่ใช้พากย์ได้' : (data.message || data.error || `API ${res.status}`);
-      throw new Error(reason);
+      const err = new Error(data.message || data.error || `API ${res.status}`);
+      err.code = data.error || `http_${res.status}`;
+      err.status = res.status;
+      err.data = data;
+      throw err;
     }
     window.dispatchEvent(new CustomEvent('ai-dub-session', { detail: data }));
+    return data;
+  }
+
+  async transcribeAudio({ audio, mediaType = 'audio/webm' }) {
+    const res = await fetch(`${this.baseUrl}/api/dub/transcribe`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ audio, mediaType })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const err = new Error(data.message || data.error || `API ${res.status}`);
+      err.code = data.error || `http_${res.status}`;
+      throw err;
+    }
     return data;
   }
 
