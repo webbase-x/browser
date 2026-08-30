@@ -1,4 +1,4 @@
-const CACHE = 'ai-thai-browser-v5';
+const CACHE = 'ai-thai-browser-v6';
 const APP_SHELL = [
   './','./index.html','./styles.css','./compat.css','./manifest.webmanifest','./assets/icon.svg',
   './js/app.js','./js/compat.js','./js/storage.js','./js/api.js','./js/youtube-dub.js'
